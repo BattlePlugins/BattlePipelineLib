@@ -1,7 +1,6 @@
 def call(body) {
   pipelineParams = [:]
   repo = pipelineParams.repo
-  version = pipelineParams.version
   body.resolveStrategy = Closure.DELEGATE_FIRST
   body.delegate = pipelineParams
   body()
