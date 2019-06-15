@@ -42,10 +42,7 @@ def call(body) {
       always {
           deleteDir()
           sendStatusToDiscord repo: pipelineParams.repo
-		   withCredentials([string(credentialsId: 'credential-id', variable: 'MY_SECRET')]) {
-    echo MY_SECRET
-}
-      }
+        }
     }
   }
 }
