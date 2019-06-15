@@ -24,22 +24,22 @@ def call(body) {
       stage('configure') {
         steps {
           echo "Setting Variables"
-          sh "git config --global user.email "$GITHUB_USER@users.noreply.github.com""
-          sh "git config --global user.name "$GITHUB_USER""
-          sh "echo "machine github.com login $GITHUB_USER password $GITHUB_TOKEN" > ~/.netrc""
+          sh "git config --global user.email '$GITHUB_USER@users.noreply.github.com'"
+          sh "git config --global user.name '$GITHUB_USER'"
+          sh "echo 'machine github.com login $GITHUB_USER password $GITHUB_TOKEN" > ~/.netrc'"
         }
       }
       stage('publish') {
         steps {
           echo "Building & Publishing"
-          sh "yarn run publish-gh-pages"
+          sh "GIT_USER=$GITHUB_USER yarn run publish-gh-pages"
         }
       }
     }
     post {
       always {
-          sendStatusToDiscord repo: pipelineParams.repo
 		  deleteDir()
+          sendStatusToDiscord repo: pipelineParams.repo
       }
     }
   }
