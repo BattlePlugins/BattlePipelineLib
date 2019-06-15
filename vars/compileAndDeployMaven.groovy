@@ -15,13 +15,21 @@ def call(body) {
       skipStagesAfterUnstable()
     }
     stages {
-      stage('install') {
+      stage('convert snapshot'){
+        when { expression { BRANCH_NAME != 'master'} }
         steps {
-          echo "Building ${pipelineParams.repo}"
-          sh 'mvn -U clean install'
+          script {
+            def pom = readMavenPom file: 'pom.xml'
+            sh "mvn versions:set -DnewVersion=${pom.version}-SNAPSHOT -f pom.xml"
+          }
         }
       }
-      stage('deliver') {
+      stage('build') {
+        steps {
+          sh 'mvn -DskipTests -U clean install'
+        }
+      }
+      stage('deploy release') {
         steps {
           configFileProvider([configFile(fileId: 'artifactory-settings', variable: 'SETTINGS')]) {
             sh "mvn deploy -s ${SETTINGS} -DskipTests -Dartifactory_url=https://artifactory.battleplugins.org/artifactory/"
