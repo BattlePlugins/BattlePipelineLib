@@ -38,7 +38,7 @@ def call(body) {
     }
     post {
       always {
-		  deleteDir()
+          deleteDir()
           sendStatusToDiscord repo: pipelineParams.repo
       }
     }
