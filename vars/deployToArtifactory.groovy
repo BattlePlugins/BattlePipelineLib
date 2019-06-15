@@ -1,10 +1,6 @@
 
 def call (Map args){
   def artifactoryId = "Artifactory-1"
-  dir("for_maven") {
-    sh "cp ../target/${args.repo}.jar ."
-  }
-
   rtServer(
       id: artifactoryId,
       url: "https://artifactory.battleplugins.org/artifactory/",
@@ -17,12 +13,11 @@ def call (Map args){
           """{
           "files": [
             {
-              "pattern": "for_maven/*.jar",
-              "target": "libs-snapshot-local/battleplugins"
+              "pattern": "target/[A-z]*-?[0-9.]*?.jar",
+              "target": "libs-snapshot-local/",
+              "regexp": "true"
             }
          ]
         }"""
   )
-
-  deleteDir("for_maven")
 }
