@@ -8,29 +8,30 @@ def call(body) {
     agent {
       docker {
         image 'maven:3-alpine'
-        args '-v /root/.m2:/root/.m2'
+        args '-v /home/cwdmedias/.m2:/root/.m2'
       }
     }
     options {
       skipStagesAfterUnstable()
     }
     stages {
-      stage('build') {
+      stage('install') {
         steps {
           echo "Building ${pipelineParams.repo}"
-          sh 'mvn -B -DskipTests clean package'
+          sh 'mvn -U clean install'
         }
       }
       stage('deliver') {
         steps {
-          sh "mvn jar:jar install:install help:evaluate -Dexpression=project.name"
-          deployToArtifactory repo: pipelineParams.repo
+          configFileProvider([configFile(fileId: 'artifactory-settings', variable: 'SETTINGS')]) {
+            sh "mvn deploy -s ${SETTINGS} -DskipTests -Dartifactory_url=https://artifactory.battleplugins.org/artifactory/"
+          }
         }
       }
     }
     post {
       always {
-          sendStatusToDiscord repo: pipelineParams.repo
+        sendStatusToDiscord repo: pipelineParams.repo
       }
     }
   }
