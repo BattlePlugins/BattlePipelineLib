@@ -1,6 +1,5 @@
 def call(body) {
-  pipelineParams = [:]
-  repo = pipelineParams.repo
+  def pipelineParams = [:]
   body.resolveStrategy = Closure.DELEGATE_FIRST
   body.delegate = pipelineParams
   body()
@@ -18,6 +17,7 @@ def call(body) {
     stages {
       stage('build') {
         steps {
+          echo "Building ${pipelineParams.repo}"
           sh 'mvn -B -DskipTests clean package'
         }
       }
@@ -25,6 +25,11 @@ def call(body) {
         steps {
           sh "mvn jar:jar install:install help:evaluate -Dexpression=project.name"
         }
+      }
+    }
+    post {
+      always {
+          sendStatusToDiscord repo: pipelineParams.repo
       }
     }
   }
