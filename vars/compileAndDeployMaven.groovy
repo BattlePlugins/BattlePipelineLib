@@ -24,6 +24,7 @@ def call(body) {
       stage('deliver') {
         steps {
           sh "mvn jar:jar install:install help:evaluate -Dexpression=project.name"
+          deployToArtifactory repo: pipelineParams.repo
         }
       }
     }
