@@ -14,13 +14,18 @@ def call(body) {
       skipStagesAfterUnstable()
     }
     stages {
-      stage('deploy') {
+      stage('setup') {
         steps {
-          configFileProvider([configFile(fileId: 'artifactory-settings', variable: 'SETTINGS')]) {
-            dir(pipelineParams.libPath) {
-              for (def s : findFiles()) {
-                sh "mvn install:install-file -Dfile=${s.path}"
-              }
+          script {
+            sh "mvn clean install"
+          }
+        }
+      }
+      stage('deploy'){
+        steps {
+          script {
+            configFileProvider([configFile(fileId: 'artifactory-settings', variable: 'SETTINGS')]) {
+              sh "mvn -s ${SETTINGS} deploy -Dartifactory_url=https://artifactory.battleplugins.org/artifactory/"
             }
           }
         }
