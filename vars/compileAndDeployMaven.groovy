@@ -33,7 +33,7 @@ def call(body) {
           configFileProvider([configFile(fileId: 'artifactory-settings', variable: 'SETTINGS')]) {
             sh "mvn deploy -s ${SETTINGS} -DskipTests -Dartifactory_url=https://artifactory.battleplugins.org/artifactory/"
           }
-          archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+          archiveArtifacts artifacts: 'target/*.jar', excludes: "target/original-*.jar", fingerprint: true
         }
       }
     }
