@@ -1,5 +1,5 @@
 def call(body) {
-  def pipelineParams = [:]
+  pipelineParams = [:]
   body.resolveStrategy = Closure.DELEGATE_FIRST
   body.delegate = pipelineParams
   body()
@@ -18,14 +18,14 @@ def call(body) {
         when { expression { BRANCH_NAME != 'master'} }
         steps {
           script {
-            def pom = readMavenPom file: 'pom.xml'
+            pom = readMavenPom file: 'pom.xml'
             sh "mvn versions:set -DnewVersion=${pom.version}-SNAPSHOT -f pom.xml"
           }
         }
       }
       stage('build') {
         steps {
-          sh 'mvn -DskipTests -U clean install'
+          sh 'mvn -DskipTests -U clean package'
         }
       }
       stage('deploy release') {
@@ -34,6 +34,28 @@ def call(body) {
             sh "mvn deploy -s ${SETTINGS} -DskipTests -Dartifactory_url=https://artifactory.battleplugins.org/artifactory/"
           }
           archiveArtifacts artifacts: 'target/*.jar', excludes: "target/original-*.jar", fingerprint: true
+        }
+      }
+      stage('git release') {
+        when { expression { BRANCH_NAME == 'master' } }
+        steps {
+          script {
+            sh "mvn help:effective-pom -Doutput=target/effective-pom.pom"
+            pom = readMavenPom file: 'target/effective-pom.pom'
+            withCredentials([string(credentialsId: 'github-token', variable: 'TOKEN')]) {
+              stdOut = sh returnStdout: true,
+                  script: "curl -H \"Content-type: application/json\" -H \"Authorization: token ${TOKEN}\" -d '{\n" +
+                      "\"tag_name\": \"${pom.version}\",\n" +
+                      "\"target_commitish\": \"master\",\n" +
+                      "\"name\": \"v${pom.version}\",\n" +
+                      "\"draft\": false,\n" +
+                      "\"prerelease\": false\n" +
+                      "}' https://api.github.com/repos/BattlePlugins/${pipelineParams.repo}/releases"
+
+              json = readJSON text: stdOut
+              sh "curl -H \"Content-type: application/java-archive\" -H \"Authorization: token ${TOKEN}\" --upload-file target/${pom.build.finalName}.jar ${json.upload_url}=${pom.build.finalName}.jar"
+            }
+          }
         }
       }
     }
