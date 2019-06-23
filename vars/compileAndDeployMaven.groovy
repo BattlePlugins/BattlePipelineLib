@@ -14,8 +14,8 @@ def call(body) {
       skipStagesAfterUnstable()
     }
     stages {
-      stage('convert snapshot'){
-        when { expression { BRANCH_NAME != 'master'} }
+      stage('convert snapshot') {
+        when { expression { BRANCH_NAME != 'master' } }
         steps {
           script {
             pom = readMavenPom file: 'pom.xml'
@@ -53,7 +53,11 @@ def call(body) {
                       "}' https://api.github.com/repos/BattlePlugins/${pipelineParams.repo}/releases"
 
               json = readJSON text: stdOut
-              sh "curl -H \"Content-type: application/java-archive\" -H \"Authorization: token ${TOKEN}\" --upload-file target/${pom.build.finalName}.jar ${json.upload_url}=${pom.build.finalName}.jar"
+              if (json.upload_url) {
+                sh "curl -H \"Content-type: application/java-archive\" -H \"Authorization: token ${TOKEN}\" --upload-file target/${pom.build.finalName}.jar ${json.upload_url}=${pom.build.finalName}.jar"
+              } else {
+                echo "No upload_url found, is this a new release?"
+              }
             }
           }
         }
