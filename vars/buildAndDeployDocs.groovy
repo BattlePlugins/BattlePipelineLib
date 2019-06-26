@@ -10,7 +10,9 @@ def call(body) {
       cron('0 3 * * *')
     }
     options {
+      skipStagesAfterUnstable()
       quietPeriod(30)
+      buildDiscarder(logRotator(numToKeepStr: '30', artifactNumToKeepStr: '10'))
     }
     stages {
       stage('install') {

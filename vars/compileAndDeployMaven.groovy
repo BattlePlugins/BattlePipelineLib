@@ -17,6 +17,7 @@ def call(body) {
     }
     options {
       skipStagesAfterUnstable()
+      buildDiscarder(logRotator(numToKeepStr: '30', artifactNumToKeepStr: '10'))
     }
     stages {
       stage('convert snapshot') {
@@ -37,7 +38,7 @@ def call(body) {
           }
         }
       }
-      stage('deploy release') {
+      stage('deploy') {
         steps {
           script {
             configFileProvider([configFile(fileId: 'artifactory-settings', variable: 'SETTINGS')]) {
