@@ -51,6 +51,22 @@ def call(body) {
           }
         }
       }
+      stage('javadoc') {
+        when { expression { BRANCH_NAME == 'master' } }
+        steps {
+          sh "mvn javadoc:javadoc"
+          dir(targetPath) {
+            publishHTML(target: [
+                allowMissing         : true,
+                alwaysLinkToLastBuild: true,
+                keepAll              : false,
+                reportDir            : 'target/site/apidocs',
+                reportFiles          : 'index.html',
+                reportName           : "Javadoc"
+            ])
+          }
+        }
+      }
       stage('git release') {
         when { expression { BRANCH_NAME == 'master' } }
         steps {
