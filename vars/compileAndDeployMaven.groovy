@@ -10,17 +10,18 @@ def call(body) {
   }
 
   pipeline {
-    agent {
-      docker {
-        image 'maven:3-alpine'
-      }
-    }
+    agent none
     options {
       skipStagesAfterUnstable()
       buildDiscarder(logRotator(numToKeepStr: '30', artifactNumToKeepStr: '10'))
     }
     stages {
       stage('convert snapshot') {
+        agent {
+          docker {
+            image 'maven:3-alpine'
+          }
+        }
         when { expression { BRANCH_NAME != 'master' } }
         steps {
           script {
@@ -30,6 +31,11 @@ def call(body) {
         }
       }
       stage('build') {
+        agent {
+          docker {
+            image 'maven:3-alpine'
+          }
+        }
         steps {
           sh 'mvn -DskipTests -U clean package'
 
@@ -39,6 +45,11 @@ def call(body) {
         }
       }
       stage('deploy') {
+        agent {
+          docker {
+            image 'maven:3-alpine'
+          }
+        }
         steps {
           script {
             configFileProvider([configFile(fileId: 'artifactory-settings', variable: 'SETTINGS')]) {
@@ -52,6 +63,11 @@ def call(body) {
         }
       }
       stage('javadoc') {
+        agent {
+          docker {
+            image 'maven:3-alpine'
+          }
+        }
         when { expression { BRANCH_NAME == 'master' } }
         steps {
           sh "mvn javadoc:javadoc"
@@ -68,27 +84,36 @@ def call(body) {
         }
       }
       stage('git release') {
+        agent any
         when { expression { BRANCH_NAME == 'master' } }
         steps {
           script {
             dir(targetPath){
               pom = readMavenPom file: "target/effective-pom.pom"
-              withCredentials([string(credentialsId: 'github-token', variable: 'TOKEN')]) {
-                stdOut = sh returnStdout: true,
-                    script: "curl -H \"Content-type: application/json\" -H \"Authorization: token ${TOKEN}\" -d '{\n" +
-                        "\"tag_name\": \"${pom.version}\",\n" +
-                        "\"target_commitish\": \"master\",\n" +
-                        "\"name\": \"v${pom.version}\",\n" +
-                        "\"draft\": false,\n" +
-                        "\"prerelease\": false\n" +
-                        "}' https://api.github.com/repos/BattlePlugins/${pipelineParams.repo}/releases"
+              html_url = uploadArtifactToGithub repo: pipelineParams.repo, version: pom.version, final_name: pom.build.finalName
 
-                json = readJSON text: stdOut
-                if (json.upload_url) {
-                  sh "curl -H \"Content-type: application/java-archive\" -H \"Authorization: token ${TOKEN}\" --upload-file target/${pom.build.finalName}.jar ${json.upload_url}=${pom.build.finalName}.jar"
-                } else {
-                  echo "No upload_url found, is this a new release?"
+              dir("site"){
+                git url: "https://github.com/BattlePlugins/BattleSite", branch: "master", credentialsId: "github-login"
+                dir("website/data"){
+                  json = readJSON file: "plugins.json"
+                  plugins = json.plugins
+                  for (i = 0; i < plugins.size(); i++){
+                    plugin = plugins[i]
+                    if (plugin.plugin.equals(pipelineParams.repo)){
+                      plugin.version = pom.version
+                      plugin.updated = new Date().format('MM/dd/yyyy')
+                      plugin.urlDownload = pom.distributionManagement.repository.url
+                      plugin.githubRelease = html_url
+                      plugin.jenkinsDownload = env.BUILD_URL
+
+                      writeJSON json: json, file: "plugins.json", pretty: 4
+                      break
+                    }
+                  }
                 }
+
+                sh "git commit -am \"[AUTOMATED] Update plugins.json\""
+                sh "git push origin master"
               }
             }
           }
