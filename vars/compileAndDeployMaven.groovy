@@ -13,7 +13,7 @@ def call(body) {
     agent none
     options {
       skipStagesAfterUnstable()
-      buildDiscarder(logRotator(numToKeepStr: '30', artifactNumToKeepStr: '10'))
+      buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '1'))
     }
     stages {
       stage('convert snapshot') {
