@@ -92,14 +92,14 @@ def call(body) {
               pom = readMavenPom file: "target/effective-pom.pom"
               html_url = uploadArtifactToGithub repo: pipelineParams.repo, version: pom.version, final_name: pom.build.finalName
 
-              dir("site"){
+              dir("site") {
                 git url: "https://github.com/BattlePlugins/BattleSite", branch: "master", credentialsId: "github-login"
-                dir("website/data"){
+                dir("website/data") {
                   json = readJSON file: "plugins.json"
                   plugins = json.plugins
-                  for (i = 0; i < plugins.size(); i++){
+                  for (i = 0; i < plugins.size(); i++) {
                     plugin = plugins[i]
-                    if (plugin.plugin.equals(pipelineParams.repo)){
+                    if (plugin.plugin.equals(pipelineParams.repo)) {
                       plugin.version = pom.version
                       plugin.updated = new Date().format('MM/dd/yyyy')
                       plugin.urlDownload = pom.distributionManagement.repository.url
@@ -112,8 +112,8 @@ def call(body) {
                   }
                 }
 
-                sh "git commit -am \"[AUTOMATED] Update plugins.json\""
-                sh "git push origin master"
+                sh "git add -A"
+                sh "git diff-index --quiet HEAD || git commit -m \"[AUTOMATED] Update plugins.json\" && git push origin master"
               }
             }
           }
