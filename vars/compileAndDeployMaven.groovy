@@ -14,6 +14,7 @@ def call(body) {
     options {
       skipStagesAfterUnstable()
       buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '1'))
+      timeout(time: 30, unit: 'MINUTES')
     }
     stages {
       stage('convert snapshot') {
