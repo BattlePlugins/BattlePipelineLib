@@ -6,9 +6,7 @@ def call(body) {
 
   pipeline {
     agent any
-    triggers {
-      cron('0 3 * * *')
-    }
+    triggers {}
     options {
       skipStagesAfterUnstable()
       quietPeriod(30)
