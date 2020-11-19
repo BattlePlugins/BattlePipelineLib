@@ -6,7 +6,6 @@ def call(body) {
 
   pipeline {
     agent any
-    triggers {}
     options {
       skipStagesAfterUnstable()
       quietPeriod(30)
