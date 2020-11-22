@@ -8,6 +8,7 @@ def call(body) {
     agent {
       docker {
         image 'maven:3-alpine'
+        alwaysPull false
       }
     }
     options {

@@ -5,7 +5,12 @@ def call(body) {
   body()
 
   pipeline {
-    agent any
+    agent {
+      docker {
+        image 'node:alpine3.10'
+        alwaysPull false
+      }
+    }
     options {
       skipStagesAfterUnstable()
       quietPeriod(30)
