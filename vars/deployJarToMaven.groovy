@@ -26,7 +26,7 @@ def call(body) {
         steps {
           script {
             configFileProvider([configFile(fileId: 'artifactory-settings', variable: 'SETTINGS')]) {
-              sh "mvn -s ${SETTINGS} deploy -Dartifactory_url=https://artifactory.battleplugins.org/artifactory/"
+              sh "mvn -s ${SETTINGS} deploy -Dartifactory_url=https://repo.battleplugins.org/artifactory/"
             }
           }
         }
