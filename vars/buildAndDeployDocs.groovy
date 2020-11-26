@@ -7,7 +7,7 @@ def call(body) {
   pipeline {
     agent {
       docker {
-        image 'node:alpine3.10'
+        image 'node:3.10'
         alwaysPull false
       }
     }
