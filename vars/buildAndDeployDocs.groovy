@@ -29,9 +29,9 @@ def call(body) {
         steps {
           echo "Setting Variables"
           withCredentials([usernamePassword(credentialsId: 'github-login', usernameVariable: 'GITHUB_USER', passwordVariable: 'GITHUB_PASSWORD')]) {
-            sh "echo 'machine github.com login ${GITHUB_USER} password ${GITHUB_PASSWORD} > ~/.netrc'"
-            sh "git config --global user.email '${GITHUB_USER}@users.noreply.github.com'"
-            sh "git config --global user.name '${GITHUB_USER}'"
+            sh "echo 'machine github.com login $GITHUB_USER password $GITHUB_PASSWORD > ~/.netrc'"
+            sh "git config --global user.email '$GITHUB_USER@users.noreply.github.com'"
+            sh "git config --global user.name '$GITHUB_USER'"
           }
         }
       }
@@ -40,7 +40,7 @@ def call(body) {
           echo "Building & Publishing"
           withCredentials([usernamePassword(credentialsId: 'github-login', usernameVariable: 'GITHUB_USER', passwordVariable: 'GITHUB_PASSWORD')]) {
             dir("website") {
-              sh "GIT_USER=${GITHUB_USER} yarn run publish-gh-pages"
+              sh "GIT_USER=$GITHUB_USER yarn run publish-gh-pages"
             }
           }
         }
