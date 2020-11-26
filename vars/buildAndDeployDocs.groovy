@@ -7,7 +7,7 @@ def call(body) {
   pipeline {
     agent {
       docker {
-        image 'node:current-buster'
+        image 'node:15.3-buster'
         alwaysPull false
       }
     }
