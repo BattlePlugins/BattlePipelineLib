@@ -1,5 +1,5 @@
 def call (Map args) {
-  withCredentials([string(credentialsId: 'github-token', variable: 'TOKEN')]) {
+  withCredentials([string(credentialsId: 'github-login', variable: 'TOKEN')]) {
     stdOut = sh returnStdout: true,
         script: "curl -H \"Content-type: application/json\" -H \"Authorization: token ${TOKEN}\" -d '{\n" +
             "\"tag_name\": \"${args.version}\",\n" +
