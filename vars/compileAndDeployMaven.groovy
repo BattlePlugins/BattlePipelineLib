@@ -92,7 +92,7 @@ def call(body) {
               dir(targetPath){
                 pom = readMavenPom file: "target/effective-pom.pom"
                 html_url = uploadArtifactToGithub repo: pipelineParams.repo, version: pom.version, final_name: pom.build.finalName
-
+                echo "Download the artifact at " + html_url
 //                dir("site") {
 //                  git changelog: false, credentialsId: 'github-login', poll: false, url: 'https://github.com/BattlePlugins/BattleDocs'
 //                  dir("website/data") {
