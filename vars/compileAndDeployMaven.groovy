@@ -93,29 +93,29 @@ def call(body) {
                 pom = readMavenPom file: "target/effective-pom.pom"
                 html_url = uploadArtifactToGithub repo: pipelineParams.repo, version: pom.version, final_name: pom.build.finalName
 
-                dir("site") {
-                  git url: "https://github.com/BattlePlugins/BattleSite", branch: "master", credentialsId: "github-login"
-                  dir("website/data") {
-                    json = readJSON file: "plugins.json"
-                    plugins = json.plugins
-                    for (i = 0; i < plugins.size(); i++) {
-                      plugin = plugins[i]
-                      if (plugin.plugin.equals(pipelineParams.repo)) {
-                        plugin.version = pom.version
-                        plugin.updated = new Date().format('MM/dd/yyyy')
-                        plugin.urlDownload = pom.distributionManagement.repository.url
-                        plugin.githubRelease = html_url
-                        plugin.jenkinsDownload = env.BUILD_URL
-
-                        writeJSON json: json, file: "plugins.json", pretty: 4
-                        break
-                      }
-                    }
-                  }
-
-                  sh "git add -A"
-                  sh "git diff-index --quiet HEAD || git commit -m \"[AUTOMATED] Update plugins.json\" && git push origin master"
-                }
+//                dir("site") {
+//                  git changelog: false, credentialsId: 'github-login', poll: false, url: 'https://github.com/BattlePlugins/BattleDocs'
+//                  dir("website/data") {
+//                    json = readJSON file: "plugins.json"
+//                    plugins = json.plugins
+//                    for (i = 0; i < plugins.size(); i++) {
+//                      plugin = plugins[i]
+//                      if (plugin.plugin.equals(pipelineParams.repo)) {
+//                        plugin.version = pom.version
+//                        plugin.updated = new Date().format('MM/dd/yyyy')
+//                        plugin.urlDownload = pom.distributionManagement.repository.url
+//                        plugin.githubRelease = html_url
+//                        plugin.jenkinsDownload = env.BUILD_URL
+//
+//                        writeJSON json: json, file: "plugins.json", pretty: 4
+//                        break
+//                      }
+//                    }
+//                  }
+//
+//                  sh "git add -A"
+//                  sh "git diff-index --quiet HEAD || git commit -m \"[AUTOMATED] Update plugins.json\" && git push origin master"
+//                }
               }
             }
           }
