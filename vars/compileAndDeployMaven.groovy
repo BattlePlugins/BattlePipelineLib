@@ -63,27 +63,27 @@ def call(body) {
             }
           }
         }
-        stage('javadoc') {
-          agent {
-            docker {
-              image 'maven:3-alpine'
-            }
-          }
-          when { expression { BRANCH_NAME == 'master' } }
-          steps {
-            sh "mvn javadoc:javadoc"
-            dir(targetPath) {
-              publishHTML(target: [
-                  allowMissing         : true,
-                  alwaysLinkToLastBuild: true,
-                  keepAll              : false,
-                  reportDir            : 'target/site/apidocs',
-                  reportFiles          : 'index.html',
-                  reportName           : "Javadoc"
-              ])
-            }
-          }
-        }
+//        stage('javadoc') {
+//          agent {
+//            docker {
+//              image 'maven:3-alpine'
+//            }
+//          }
+//          when { expression { BRANCH_NAME == 'master' } }
+//          steps {
+//            sh "mvn javadoc:javadoc"
+//            dir(targetPath) {
+//              publishHTML(target: [
+//                  allowMissing         : true,
+//                  alwaysLinkToLastBuild: true,
+//                  keepAll              : false,
+//                  reportDir            : 'target/site/apidocs',
+//                  reportFiles          : 'index.html',
+//                  reportName           : "Javadoc"
+//              ])
+//            }
+//          }
+//        }
         stage('git release') {
           agent any
           when { expression { BRANCH_NAME == 'master' } }
